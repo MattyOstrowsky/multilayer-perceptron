@@ -108,6 +108,7 @@ class MLP:
             verbose (bool): Enable verbose output.
         """
         # now enter the training loop
+        sum_errors_epochs = 0
         for i in trange(epochs):
             sum_errors = 0
 
@@ -123,15 +124,17 @@ class MLP:
                 # now perform gradient descent on the derivatives
                 # keep track of the MSE
                 sum_errors += self._mse(target, outputs)
-
+                sum_errors_epochs += self._mse(target, outputs)
                 # (will update the weights)
                 self.gradient_descent(learning_rate, verbose=verbose)
-            print("\nAvg error: {} at epoch {}".format(sum_errors / len(y), i + 1))
-            print("Epoch {} finished!!".format(i+1))
-            print("==========================================================")
+            if verbose:
+                print("\nAvg error: {} at epoch {}".format(sum_errors / len(y), i + 1))
+                print("Epoch {} finished!!".format(i+1))
+                print("==========================================================")
             # Epoch complete, report the training error
 
         print("Training complete!")
+        print("Avg error: {} after {} epochs".format(sum_errors_epochs / epochs, i + 1))
         print("==========================================================")
 
     def gradient_descent(self, learning_rate: float, verbose=False) -> None:
