@@ -1,39 +1,8 @@
+from time import sleep
 import numpy as np
 from numpy import ndarray
 
-
-def sigmoid(x):
-    """
-        Sigmoid activation function
-    Args:
-        x (ndarray, int): Value to be processed
-    Returns:
-        y (ndarray, int): Output
-    """
-    return 1.0 / (1 + np.exp(-x))
-
-
-def sigmoid_derivative(x):
-    """
-        Sigmoid activation function
-    Args:
-        x (ndarray, int): Value to be processed
-    Returns:
-        y (ndarray, int): Output
-    """
-    return x * (1.0 - x)
-
-
-def mse(x: ndarray, y: ndarray):
-    """
-        Mean Squared Error loss function
-    Args:
-        x (ndarray): The ground trut
-        y (ndarray): The predicted values
-    Returns:
-        (float): Output
-    """
-    return np.average((x - y) ** 2)
+from tqdm import tqdm, trange
 
 
 class MLP:
@@ -51,7 +20,15 @@ class MLP:
     Returns:
         None
     Example:
+        import numpy as np
+        from perceptron import MLP
+        from random import uniform
 
+        x_train = np.array([[uniform(0, 10) for _ in range(2)] for _ in range(1000)])
+        y_train = np.array([[(i[0] * i[1]**2)/2] for i in x_train])
+
+        mlp = MLP(2, [2], 1)
+        mlp.train(x_train, y_train, 50, 0.01, verbose=False)
     """
 
     def __init__(self, num_inputs: int, hidden_layers: list, num_outputs: int):
@@ -86,13 +63,16 @@ class MLP:
             activations (ndarray): Output values
         """
         activations = inputs
+        if verbose:
+            print("Input values: \n {}".format(activations))
         self.activations[0] = activations
         for i, w in enumerate(self.weights):
             net_inputs = np.dot(activations, w)
-            activations = sigmoid(net_inputs)
+            activations = self._sigmoid(net_inputs)
             self.activations[i + 1] = activations
         if verbose:
-            print("activations units: \n {}".format(activations))
+            print("\n****** Compute the weighted sums in each neuron, propagate results to the output layer ******")
+            print("activations/output units: \n {}".format(activations))
         return activations
 
     def back_propagate(self, error: ndarray, verbose: bool = False):
@@ -107,7 +87,7 @@ class MLP:
         for i in reversed(range(len(self.derivatives))):
             # get activation for previous layer
             activations = self.activations[i + 1]
-            delta = error * sigmoid_derivative(activations)
+            delta = error * self._sigmoid_derivative(activations)
             delta_reshaped = delta.reshape(delta.shape[0], -1).T
 
             current_activations = self.activations[i]
@@ -116,35 +96,43 @@ class MLP:
             # backpropogate the next error
             error = np.dot(delta, self.weights[i].T)
             if verbose:
-                print("Derivatives for W{}: \n{}".format(i, self.derivatives))
+                print("Derivatives for W{}: \n{}".format(i, self.derivatives[i]))
 
-    def train(self, x: ndarray, y: ndarray, epochs: int, learning_rate: float, verbose = False):
+    def train(self, x: ndarray, y: ndarray, epochs: int, learning_rate: float, verbose=False):
         """Trains model running forward prop and backprop
         Args:
             x (ndarray): Training data.
             y (ndarray): Training data.
             epochs (int): Num. epochs we want to train the network for
             learning_rate (float): Step to apply to gradient descent
+            verbose (bool): Enable verbose output.
         """
         # now enter the training loop
-        for i in range(epochs):
+        for i in trange(epochs):
             sum_errors = 0
+
             for j, inputs in enumerate(x):
                 target = y[j]
                 # activate the network
                 outputs = self.forward_propagate(inputs, verbose=verbose)
                 error = target - outputs
-
+                if verbose:
+                    print("\n ****** Error and derivatives calculation ******")
+                    print("Error for each outputs: \n{}".format(error))
                 self.back_propagate(error, verbose=verbose)
                 # now perform gradient descent on the derivatives
+                # keep track of the MSE
+                sum_errors += self._mse(target, outputs)
+
                 # (will update the weights)
                 self.gradient_descent(learning_rate, verbose=verbose)
-                # keep track of the MSE
-                sum_errors += mse(target, outputs)
+            print("\nAvg error: {} at epoch {}".format(sum_errors / len(y), i + 1))
+            print("Epoch {} finished!!".format(i+1))
+            print("==========================================================")
             # Epoch complete, report the training error
-            print("Error: {} at epoch {}".format(sum_errors / len(y), i + 1))
+
         print("Training complete!")
-        print("=====")
+        print("==========================================================")
 
     def gradient_descent(self, learning_rate: float, verbose=False) -> None:
         """
@@ -158,6 +146,7 @@ class MLP:
         for i in range(len(self.weights)):
             weight = self.weights[i]
             if verbose:
+                print("\n ****** update layers with the value of the gradient! ******")
                 print("Original W{}: \n{}".format(i, weight))
             derivative = self.derivatives[i]
             weight += derivative * learning_rate
@@ -169,10 +158,45 @@ class MLP:
         Predict for samples in X.
         Args:
             x (ndarray): Training data.
+
+        Return:
+            outputs (ndarray): Prediction for sample
         """
 
         outputs = self.forward_propagate(x)
-        print("Our network believes that is equal to {}".format(outputs))
+
         return outputs
 
+    @staticmethod
+    def _sigmoid(x):
+        """
+            Sigmoid activation function
+        Args:
+            x (ndarray, int): Value to be processed
+        Returns:
+            y (ndarray, int): Output
+        """
+        return 1.0 / (1 + np.exp(-x))
 
+    @staticmethod
+    def _sigmoid_derivative(x):
+        """
+            Sigmoid activation function
+        Args:
+            x (ndarray, int): Value to be processed
+        Returns:
+            y (ndarray, int): Output
+        """
+        return x * (1.0 - x)
+
+    @staticmethod
+    def _mse(x: ndarray, y: ndarray):
+        """
+            Mean Squared Error loss function
+        Args:
+            x (ndarray): The ground trut
+            y (ndarray): The predicted values
+        Returns:
+            (float): Output
+        """
+        return np.average((x - y) ** 2)

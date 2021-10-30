@@ -20,5 +20,5 @@ if __name__ == "__main__":
     y_test = np.array([1, 0, 0, 0])
 
     # get a prediction
-    output = mlp.predict(x_test)
-
+    outputs = mlp.predict(x_test)
+    print("Our network believes that is equal to {}".format(outputs))
