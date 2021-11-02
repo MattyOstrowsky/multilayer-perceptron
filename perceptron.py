@@ -1,8 +1,7 @@
-from time import sleep
 import numpy as np
 from numpy import ndarray
 
-from tqdm import tqdm, trange
+from tqdm import trange
 
 
 class MLP:
@@ -36,7 +35,7 @@ class MLP:
         self.hidden_layers = hidden_layers
         self.num_outputs = num_outputs
         layers = [self.num_inputs] + self.hidden_layers + [self.num_outputs]
-
+        self.bias = False
         self.weights = []
         for i in range(len(layers) - 1):
             w = np.random.rand(layers[i], layers[i + 1])
@@ -52,13 +51,14 @@ class MLP:
             a = np.zeros(layers[i])
             self.activations.append(a)
 
-    def forward_propagate(self, inputs, verbose=False) -> ndarray:
+    def forward_propagate(self, inputs, bias, verbose=False) -> ndarray:
         """
             Computes forward propagation of the network based on input signals.
 
         Args:
             inputs (ndarray): Input signals
             verbose (bool): Enable verbose output.
+            bias (bool): Add bias to net_inputs.
         Returns:
             activations (ndarray): Output values
         """
@@ -67,7 +67,10 @@ class MLP:
             print("Input values: \n {}".format(activations))
         self.activations[0] = activations
         for i, w in enumerate(self.weights):
-            net_inputs = np.dot(activations, w)
+            if bias:
+                net_inputs = np.dot(activations, w) + 1
+            else:
+                net_inputs = np.dot(activations, w)
             activations = self._sigmoid(net_inputs)
             self.activations[i + 1] = activations
         if verbose:
@@ -98,7 +101,7 @@ class MLP:
             if verbose:
                 print("Derivatives for W{}: \n{}".format(i, self.derivatives[i]))
 
-    def train(self, x: ndarray, y: ndarray, epochs: int, learning_rate: float, verbose=False):
+    def train(self, x: ndarray, y: ndarray, epochs: int, learning_rate: float, bias: bool, verbose=False):
         """Trains model running forward prop and backprop
         Args:
             x (ndarray): Training data.
@@ -106,8 +109,10 @@ class MLP:
             epochs (int): Num. epochs we want to train the network for
             learning_rate (float): Step to apply to gradient descent
             verbose (bool): Enable verbose output.
+            bias (bool): Add bias to net_inputs.
         """
         # now enter the training loop
+        self.bias = bias
         sum_errors_epochs = 0
         for i in trange(epochs):
             sum_errors = 0
@@ -115,7 +120,7 @@ class MLP:
             for j, inputs in enumerate(x):
                 target = y[j]
                 # activate the network
-                outputs = self.forward_propagate(inputs, verbose=verbose)
+                outputs = self.forward_propagate(inputs, bias=bias, verbose=verbose)
                 error = target - outputs
                 if verbose:
                     print("\n ****** Error and derivatives calculation ******")
@@ -127,15 +132,17 @@ class MLP:
                 sum_errors_epochs += self._mse(target, outputs)
                 # (will update the weights)
                 self.gradient_descent(learning_rate, verbose=verbose)
+                print("Training session {}/{}".format(j + 1, len(x)))
+                print('-' * 30)
             if verbose:
                 print("\nAvg error: {} at epoch {}".format(sum_errors / len(y), i + 1))
-                print("Epoch {} finished!!".format(i+1))
-                print("==========================================================")
+                print("Epoch {} finished!!".format(i + 1))
+                print("=" * 30)
             # Epoch complete, report the training error
 
         print("Training complete!")
         print("Avg error: {} after {} epochs".format(sum_errors_epochs / epochs, i + 1))
-        print("==========================================================")
+        print("=" * 30)
 
     def gradient_descent(self, learning_rate: float, verbose=False) -> None:
         """
@@ -166,7 +173,7 @@ class MLP:
             outputs (ndarray): Prediction for sample
         """
 
-        outputs = self.forward_propagate(x)
+        outputs = self.forward_propagate(x, bias=self.bias)
 
         return outputs
 
