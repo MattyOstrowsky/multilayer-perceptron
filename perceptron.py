@@ -68,7 +68,7 @@ class MLP:
         self.activations[0] = activations
         for i, w in enumerate(self.weights):
             if bias:
-                net_inputs = np.dot(activations, w) + 1 # blad
+                net_inputs = np.dot(activations, w)  
             else:
                 net_inputs = np.dot(activations, w)
             activations = self._sigmoid(net_inputs)
@@ -135,11 +135,11 @@ class MLP:
                 if verbose:
                     print("Training session {}/{}".format(j + 1, len(x)))
                     print('-' * 30)
-
-            print("\nAvg error: {} at epoch {}".format(sum_errors / len(y), i + 1))
-            print("Epoch {} finished!!".format(i + 1))
-            print("=" * 30)
-            # Epoch complete, report the training error
+            if verbose:
+                print("\nAvg error: {} at epoch {}".format(sum_errors / len(y), i + 1))
+                print("Epoch {} finished!!".format(i + 1))
+                print("=" * 30)
+                # Epoch complete, report the training error
 
         print("Training complete!")
         print("Avg error: {} after {} epochs".format(sum_errors_epochs / epochs, i + 1))
