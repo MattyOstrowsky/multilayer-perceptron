@@ -10,10 +10,10 @@ if __name__ == "__main__":
     y_train = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
 
     # create a Multilayer Perceptron with one hidden layer
-    mlp = MLP(4, [2], 4)
+    mlp = MLP(4, [2], 4, bias = False)
 
     # train network
-    mlp.train(x_train, y_train, 1000, 0.2, verbose=False)
+    mlp.train(x_train, y_train, 5000, 0.2, verbose=False)
 
     x_test = np.array([1, 0, 0, 0])
 

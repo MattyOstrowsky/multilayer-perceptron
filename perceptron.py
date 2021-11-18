@@ -31,7 +31,9 @@ class MLP:
     """
 
     def __init__(self, num_inputs: int, hidden_layers: list, num_outputs: int, bias: bool= True):
+        
         self.bias = bias
+        
         if self.bias:
             self.num_inputs = num_inputs
             self.hidden_layers = [i+1 for i in hidden_layers]
@@ -58,9 +60,10 @@ class MLP:
             a = np.zeros(layers[i])
             self.activations.append(a)
             
-        # update bias to 1
-        for i in range(len(layers)-1):
-            self.activations[i+1][-1] = 1.
+        # update bias neuron to 1
+        if self.bias:
+            for i in range(len(layers)-1):
+                self.activations[i+1][-1] = 1.
             
             
     def forward_propagate(self, inputs, verbose=False) -> ndarray:
@@ -81,7 +84,10 @@ class MLP:
         for i, w in enumerate(self.weights):
             net_inputs = np.dot(activations, w)
             activations = self._sigmoid(net_inputs)
-            self.activations[i + 1][:-1] = activations[:-1]
+            if self.bias:
+                self.activations[i + 1][:-1] = activations[:-1]
+            else:
+                self.activations[i + 1] = activations
         if verbose:
             print("\n****** Compute the weighted sums in each neuron, propagate results to the output layer ******")
             print("activations/output units: \n {}".format(activations))
@@ -188,9 +194,9 @@ class MLP:
         """
         prediction = self.forward_propagate(x)
         if self.bias:
-            return prediction[:-1]
+            return np.round(prediction[:-1], 2)
         else:
-            return prediction
+            return np.round(prediction, 2)
 
     @staticmethod
     def _sigmoid(x):
