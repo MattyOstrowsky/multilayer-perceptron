@@ -13,7 +13,7 @@ if __name__ == "__main__":
     mlp = MLP(4, [2], 4)
 
     # train network
-    mlp.train(x_train, y_train, 1000, 0.2, bias=False, verbose=False)
+    mlp.train(x_train, y_train, 1000, 0.2, verbose=False)
 
     x_test = np.array([1, 0, 0, 0])
 

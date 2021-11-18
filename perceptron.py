@@ -12,7 +12,7 @@ class MLP:
         num_inputs (int): numer of imputs layer
         hidden_layers (list) : list of neutron layers. Number in list specifying a number of neutron in hidden layer
         num_outputs (int): number of output layer
-
+        bias (bool): Add bias to net_inputs 
     Attributes:
         weights (list): list of weights for all connection between layers
         activations (list):
@@ -30,12 +30,19 @@ class MLP:
         mlp.train(x_train, y_train, 50, 0.01, verbose=False)
     """
 
-    def __init__(self, num_inputs: int, hidden_layers: list, num_outputs: int):
-        self.num_inputs = num_inputs
-        self.hidden_layers = hidden_layers
-        self.num_outputs = num_outputs
+    def __init__(self, num_inputs: int, hidden_layers: list, num_outputs: int, bias: bool= True):
+        self.bias = bias
+        if self.bias:
+            self.num_inputs = num_inputs
+            self.hidden_layers = [i+1 for i in hidden_layers]
+            self.num_outputs = num_outputs+1
+        else:
+            self.num_inputs = num_inputs
+            self.hidden_layers = hidden_layers
+            self.num_outputs = num_outputs
+            
         layers = [self.num_inputs] + self.hidden_layers + [self.num_outputs]
-        self.bias = False
+        
         self.weights = []
         for i in range(len(layers) - 1):
             w = np.random.rand(layers[i], layers[i + 1])
@@ -50,15 +57,20 @@ class MLP:
         for i in range(len(layers)):
             a = np.zeros(layers[i])
             self.activations.append(a)
-
-    def forward_propagate(self, inputs, bias, verbose=False) -> ndarray:
+            
+        # update bias to 1
+        for i in range(len(layers)-1):
+            self.activations[i+1][-1] = 1.
+            
+            
+    def forward_propagate(self, inputs, verbose=False) -> ndarray:
         """
             Computes forward propagation of the network based on input signals.
 
         Args:
             inputs (ndarray): Input signals
             verbose (bool): Enable verbose output.
-            bias (bool): Add bias to net_inputs.
+            
         Returns:
             activations (ndarray): Output values
         """
@@ -67,12 +79,9 @@ class MLP:
             print("Input values: \n {}".format(activations))
         self.activations[0] = activations
         for i, w in enumerate(self.weights):
-            if bias:
-                net_inputs = np.dot(activations, w)  
-            else:
-                net_inputs = np.dot(activations, w)
+            net_inputs = np.dot(activations, w)
             activations = self._sigmoid(net_inputs)
-            self.activations[i + 1] = activations
+            self.activations[i + 1][:-1] = activations[:-1]
         if verbose:
             print("\n****** Compute the weighted sums in each neuron, propagate results to the output layer ******")
             print("activations/output units: \n {}".format(activations))
@@ -89,11 +98,15 @@ class MLP:
         """
         for i in reversed(range(len(self.derivatives))):
             # get activation for previous layer
-            activations = self.activations[i + 1]
-            delta = error * self._sigmoid_derivative(activations)
+            if self.bias:
+                delta = error * self._sigmoid_derivative(self.activations[i + 1])
+                current_activations = self.activations[i]
+            else:
+                delta = error * self._sigmoid_derivative(self.activations[i + 1])
+                current_activations = self.activations[i]
             delta_reshaped = delta.reshape(delta.shape[0], -1).T
 
-            current_activations = self.activations[i]
+            
             current_activations = current_activations.reshape(current_activations.shape[0], -1)
             self.derivatives[i] = np.dot(current_activations, delta_reshaped)
             # backpropogate the next error
@@ -101,7 +114,7 @@ class MLP:
             if verbose:
                 print("Derivatives for W{}: \n{}".format(i, self.derivatives[i]))
 
-    def train(self, x: ndarray, y: ndarray, epochs: int, learning_rate: float, bias: bool, verbose=False):
+    def train(self, x: ndarray, y: ndarray, epochs: int, learning_rate: float, verbose=False):
         """Trains model running forward prop and backprop
         Args:
             x (ndarray): Training data.
@@ -109,10 +122,8 @@ class MLP:
             epochs (int): Num. epochs we want to train the network for
             learning_rate (float): Step to apply to gradient descent
             verbose (bool): Enable verbose output.
-            bias (bool): Add bias to net_inputs.
         """
         # now enter the training loop
-        self.bias = bias
         sum_errors_epochs = 0
         for i in trange(epochs):
             sum_errors = 0
@@ -120,7 +131,9 @@ class MLP:
             for j, inputs in enumerate(x):
                 target = y[j]
                 # activate the network
-                outputs = self.forward_propagate(inputs, bias=bias, verbose=verbose)
+                outputs = self.forward_propagate(inputs, verbose=verbose)
+                if self.bias:
+                    target = np.append(target,1)
                 error = target - outputs
                 if verbose:
                     print("\n ****** Error and derivatives calculation ******")
@@ -173,10 +186,11 @@ class MLP:
         Return:
             outputs (ndarray): Prediction for sample
         """
-
-        outputs = self.forward_propagate(x, bias=self.bias)
-
-        return outputs
+        prediction = self.forward_propagate(x)
+        if self.bias:
+            return prediction[:-1]
+        else:
+            return prediction
 
     @staticmethod
     def _sigmoid(x):
