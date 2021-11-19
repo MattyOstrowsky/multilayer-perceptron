@@ -6,8 +6,14 @@ name = "pypi"
 [packages]
 tqdm = "*"
 numpy = "*"
+seaborn = "*"
+pandas = "*"
 
 [dev-packages]
+black = "*"
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true
