@@ -44,14 +44,14 @@ Epochs: 100%|██████████████████████�
 Training complete!
 Avg mse error: 0.20 after 5000 epochs
 ====================================================================================================
-Our network believes that is equal to [0.94 0.06 0.   0.04]
-Our network believes that is equal to [0.04 0.95 0.07 0.  ]
-Our network believes that is equal to [0.   0.03 0.93 0.04]
-Our network believes that is equal to [0.04 0.   0.06 0.95]
+Network believes that is equal to [0.94 0.06 0.   0.04]
+Network believes that is equal to [0.04 0.95 0.07 0.  ]
+Network believes that is equal to [0.   0.03 0.93 0.04]
+Network believes that is equal to [0.04 0.   0.06 0.95]
 ```
 And you will also receive a file example_plot.png:
 <p align="center">
-  <img align="center" width="auto" src="https://github.com/gunater/multilayer-perceptron/blob/master/example_plot.png?raw=true">
+  <img align="center" width="auto" src="https://github.com/gunater/multilayer-perceptron/blob/main/example_plot.png?raw=true">
 </p>
 ## License
 All code is licensed under an MIT license. This allows you to re-use the code freely, remixed in both commercial and non-commercial projects. The only requirement is to include the same license when distributing.
