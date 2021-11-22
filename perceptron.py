@@ -33,7 +33,7 @@ class MLP:
     """
 
     def __init__(self, num_inputs: int, hidden_layers: list, num_outputs: int, bias: bool= True):
-        
+        self.hidden_activates = []
         self.bias = bias
         self.list_mse_epochs = []
         self.avg_list_mse_epochs = []
@@ -47,7 +47,6 @@ class MLP:
             self.num_outputs = num_outputs
             
         layers = [self.num_inputs] + self.hidden_layers + [self.num_outputs]
-        
         self.weights = []
         for i in range(len(layers) - 1):
             w = np.random.rand(layers[i], layers[i + 1])
@@ -91,9 +90,20 @@ class MLP:
                 self.activations[i + 1][:-1] = activations[:-1]
             else:
                 self.activations[i + 1] = activations
+
         if verbose:
+            print("hidden layers: ")
+            if self.bias:
+                print(self.activations[1][:-1])
+                x = self.activations[1][:-1]
+                self.hidden_activates.append(x.tolist())
+            else:
+                print(self.activations[1])
+                x = self.activations[1]
+                self.hidden_activates.append(x.tolist())
             print_header(' Compute the weighted sums in each neuron, propagate results to the output layer ')
             print_under_other("Output units: ", activations)
+            
         return activations
 
     def back_propagate(self, error: ndarray, verbose: bool = False):
