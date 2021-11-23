@@ -115,3 +115,5 @@ dmypy.json
 .pyre/
 .vscode/
 Pipfile.lock
+hidden.png
+example_plot.png

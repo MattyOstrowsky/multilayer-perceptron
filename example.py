@@ -11,7 +11,7 @@ if __name__ == "__main__":
     y_train = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
 
     # create a Multilayer Perceptron with one hidden layer
-    mlp = MLP(4, [2], 4, bias=True)
+    mlp = MLP(4, [2], 4, bias=False)
 
     # train network
     x = mlp.train(x_train, y_train, 1, 0.2, verbose=True)
@@ -19,15 +19,15 @@ if __name__ == "__main__":
     mlp.plot_mse('example_plot')
 
     # plot activations on hidden layer each training session
-    # list_epochs = [i+1 for i in range(1000)]
-    # df_hidden = pd.DataFrame(mlp.hidden_activates, columns=['1 neuron', '2 neuron'])
-    # df_epoch = pd.DataFrame(list_epochs, columns=['epochs'])
-    # df = pd.concat([df_epoch, df_hidden], axis=1)
-    # plt.clf()
-    # sns.lineplot(x='epochs', y='value', hue='variable', 
-    #          data=pd.melt(df, ['epochs']),legend=False)
-    # plt.legend(title = "Hidden_layer")
-    # plt.savefig('hidden.png')
+    list_epochs = [i+1 for i in range(1000)]
+    df_hidden = pd.DataFrame(mlp.hidden_activates, columns=['1 neuron', '2 neuron'])
+    df_epoch = pd.DataFrame(list_epochs, columns=['epochs'])
+    df = pd.concat([df_epoch, df_hidden], axis=1)
+    plt.clf()
+    sns.lineplot(x='epochs', y='value', hue='variable', 
+             data=pd.melt(df, ['epochs']),legend=False)
+    plt.legend(title = "Hidden_layer")
+    plt.savefig('hidden.png')
     
     # get first prediction
     x_test = np.array([1, 0, 0, 0])
