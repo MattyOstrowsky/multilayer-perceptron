@@ -1,6 +1,6 @@
 # multilayer-perceptron
 
-<img align="right" width="33%" src="https://cdn-icons.flaticon.com/png/512/3401/premium/3401562.png?token=exp=1637357148~hmac=99e443032e3886076e10af7d73fd732f">
+<img align="right" width="25%" src="https://github.com/gunater/multilayer-perceptron/blob/main/assets/icons8-artificial-intelligence-100.png">
 
 ## Table of contents
 
@@ -53,6 +53,9 @@ And you will also receive a file example_plot.png:
 <p align="center">
   <img align="center" width="auto" src="https://github.com/gunater/multilayer-perceptron/blob/main/example_plot.png?raw=true">
 </p>
+
 ## License
 All code is licensed under an MIT license. This allows you to re-use the code freely, remixed in both commercial and non-commercial projects. The only requirement is to include the same license when distributing.
 
+
+<a target="_blank" href="https://icons8.com/icon/61864/artificial-intelligence">Artificial Intelligence</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
